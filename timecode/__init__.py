@@ -220,6 +220,10 @@ class Timecode(object):
         milliseconds '00:00:00.000'
         """
         bfr = timecode.replace(';', ':').replace('.', ':').split(':')
+        bfr.reverse()
+        while len(bfr) < 4:
+            bfr.append('00')
+        bfr.reverse()
         hrs = int(bfr[0])
         mins = int(bfr[1])
         secs = int(bfr[2])
