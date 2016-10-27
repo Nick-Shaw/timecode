@@ -35,10 +35,10 @@ class Timecode(object):
         using the frame rate setting.
 
         :param framerate: The frame rate of the Timecode instance. It
-          should be one of ['23.98', '24', '25', '29.97', '30', '50', '59.94',
-          '60', 'ms'] where "ms" equals to 1000 fps. Can not be skipped.
-          Setting the framerate will automatically set the :attr:`.drop_frame`
-          attribute to correct value.
+          should be one of ['23.976', '23.98', '24', '25', '29.97', '30', '50',
+          '59.94', '60', 'ms'] where "ms" equals to 1000 fps. Can not be
+          skipped. Setting the framerate will automatically set the
+          :attr:`.drop_frame` attribute to correct value.
         :param start_timecode: The start timecode. Use this to be able to
           set the timecode of this Timecode instance. It can be skipped and
           then the frames attribute will define the timecode, and if it is also
@@ -96,7 +96,7 @@ class Timecode(object):
         elif framerate == '59.94':
             self._int_framerate = 60
             self.drop_frame = True
-        elif framerate == '23.98':
+        elif framerate == '23.98' or framerate == '23.976':
             framerate = '24'
             self._int_framerate = 24
         elif framerate in ['ms', '1000']:
@@ -153,7 +153,7 @@ class Timecode(object):
              (ifps * seconds) + frames) - \
             (drop_frames * (total_minutes - (total_minutes // 10)))
 
-        frames = frame_number # + 1
+        frames = frame_number  # + 1
 
         return frames
 
@@ -181,7 +181,7 @@ class Timecode(object):
         # the number of dropped frames
         frames_per_minute = int(round(ffps) * 60) - drop_frames
 
-        frame_number = frames # - 1
+        frame_number = frames  # - 1
 
         if frame_number < 0:
             # Negative time. Add 24 hours.
