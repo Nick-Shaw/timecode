@@ -153,7 +153,7 @@ class Timecode(object):
              (ifps * seconds) + frames) - \
             (drop_frames * (total_minutes - (total_minutes // 10)))
 
-        frames = frame_number + 1
+        frames = frame_number # + 1
 
         return frames
 
@@ -181,7 +181,7 @@ class Timecode(object):
         # the number of dropped frames
         frames_per_minute = int(round(ffps) * 60) - drop_frames
 
-        frame_number = frames - 1
+        frame_number = frames # - 1
 
         if frame_number < 0:
             # Negative time. Add 24 hours.
@@ -367,9 +367,9 @@ class Timecode(object):
 
     @property
     def frame_number(self):
-        """returns the 0 based frame number of the current timecode instance
+        """returns the 1 based frame number of the current timecode instance
         """
-        return self.frames - 1
+        return self.frames + 1
 
 
 class TimecodeError(Exception):
