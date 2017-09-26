@@ -1,7 +1,8 @@
 #!-*- coding: utf-8 -*-
 # The MIT License (MIT)
 #
-# Copyright (c) 2014 Joshua Banton and PyTimeCode developers
+# Original Copyright (c) 2014 Joshua Banton and PyTimeCode developers
+# This version Copyright (c) 2017 Nick Shaw, Antler Post
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +23,7 @@
 # THE SOFTWARE.
 
 
-__version__ = '0.4.0'
+__version__ = 'Antler 0.2.0'
 
 
 class Timecode(object):
@@ -62,7 +63,14 @@ class Timecode(object):
         # attribute override order
         # start_timecode > frames > start_seconds
         if start_timecode:
-            self.frames = self.tc_to_frames(start_timecode)
+            if isinstance(start_timecode, str):
+                self.frames = self.tc_to_frames(start_timecode)
+            elif isinstance(start_timecode, int):
+                self.frames = start_timecode
+            elif isinstance(start_timecode, float):
+                self.frames = self.float_to_tc(start_timecode)
+            else:
+                self.frames = 0
         else:
             if frames is not None:  # because 0==False, and frames can be 0
                 self.frames = frames
@@ -208,11 +216,18 @@ class Timecode(object):
         return hrs, mins, secs, frs
 
     def tc_to_string(self, hrs, mins, secs, frs):
-        return "%02d:%02d:%02d%s%02d" % (hrs,
-                                         mins,
-                                         secs,
-                                         self.frame_delimiter,
-                                         frs)
+        if self.frame_delimiter == '.':
+            return "%02d:%02d:%02d%s%03d" % (hrs,
+                                             mins,
+                                             secs,
+                                             '.',
+                                             frs)
+        else:
+            return "%02d:%02d:%02d%s%02d" % (hrs,
+                                             mins,
+                                             secs,
+                                             self.frame_delimiter,
+                                             frs)
 
     @classmethod
     def parse_timecode(cls, timecode):
@@ -222,8 +237,12 @@ class Timecode(object):
         bfr = timecode.replace(';', ':').replace('.', ':').split(':')
         bfr.reverse()
         while len(bfr) < 4:
+            # fill missing leading fields
             bfr.append('00')
         bfr.reverse()
+        if '.' in timecode:
+            # round/pad to three decimal places
+            bfr[3] = str(int(round(float(bfr[3])/10**(len(bfr[3])-3))))
         hrs = int(bfr[0])
         mins = int(bfr[1])
         secs = int(bfr[2])
@@ -257,6 +276,7 @@ class Timecode(object):
         """adds or subtracts frames number of frames
         """
         self.frames += frames
+        self.frames = self.frames % self.one_day
 
     def sub_frames(self, frames):
         """adds or subtracts frames number of frames
@@ -267,10 +287,12 @@ class Timecode(object):
         """multiply frames
         """
         self.frames *= frames
+        self.frames = self.frames % self.one_day
 
     def div_frames(self, frames):
         """adds or subtracts frames number of frames"""
         self.frames = self.frames / frames
+        self.frames = self.frames % self.one_day
 
     def __eq__(self, other):
         """the overridden equality operator
@@ -301,6 +323,7 @@ class Timecode(object):
                 other.__class__.__name__
             )
 
+        tc.frames = tc.frames % self.one_day
         return tc
 
     def __sub__(self, other):
@@ -315,7 +338,7 @@ class Timecode(object):
                 other.__class__.__name__
             )
 
-        return Timecode(self._framerate, frames=subtracted_frames)
+        return Timecode(self._framerate, frames=(subtracted_frames % self.one_day))
 
     def __mul__(self, other):
         """returns new Timecode object with added timecodes"""
@@ -329,7 +352,7 @@ class Timecode(object):
                 other.__class__.__name__
             )
 
-        return Timecode(self._framerate, frames=multiplied_frames)
+        return Timecode(self._framerate, frames=(multiplied_frames % self.one_day))
 
     def __div__(self, other):
         """returns new Timecode object with added timecodes"""
@@ -343,7 +366,7 @@ class Timecode(object):
                 other.__class__.__name__
             )
 
-        return Timecode(self._framerate, frames=div_frames)
+        return Timecode(self._framerate, frames=(div_frames % self.one_day))
 
     def __repr__(self):
         return self.tc_to_string(*self.frames_to_tc(self.frames))
@@ -373,6 +396,12 @@ class Timecode(object):
         """returns the 1 based frame number of the current timecode instance
         """
         return self.frames + 1
+
+    @property
+    def one_day(self):
+        """returns the number of frames in a day
+        """
+        return Timecode(self.framerate, '24:00:00:00').frames
 
 
 class TimecodeError(Exception):
