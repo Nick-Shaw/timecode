@@ -2,6 +2,21 @@
 Changes
 =======
 
+Antler 0.2.0
+============
+
+* **Update:** ``self.frame`` and ``self.frame_number`` have been reversed so
+that maths matches other timcode implementations. ``00:00:00:10 + 00:00:00:10
+== 00:00:00:20`` rather than ``00:00:00:21`` as previously.
+
+* **New:** Incomplete timecode strings, such as ``10:00`` can be entered.
+
+* **New:** Frame counts can be entered, so ``Timecode(25, 100)`` becomes
+``00:00:04:00``.
+
+* **Update:** All maths is now performed modulo ``self.one_day``, so it wraps
+around at 24 hours.
+
 0.4.0
 =====
 
