@@ -37,11 +37,11 @@ Use the ``frame_number`` attribute if you want to get a 1 based frame number:
 Frame rates 29.97 and 59.94 are always drop frame, and all the others are non
 drop frame.
 
-The SMPTE standard limits the timecode with 24 hours. Even though, Timecode
-instance will show the current timecode inline with the SMPTE standard, it will
-keep counting the total frames without clipping it.
+The SMPTE standard limits the timecode to 24 hours. All maths performed by
+Timecode is therefore performed modulo ``one_day``.
 
-Please report any bugs to the [GitHub](https://github.com/eoyilmaz/timecode)
+Please report any bugs to the [GitHub](https://github.com/Nick-Shaw/timecode)
 page.
 
-Copyright 2014 Joshua Banton and PyTimeCode developers.
+Original Copyright 2014 Joshua Banton and PyTimeCode developers.
+This version Copyright 2017 Nick Shaw, Antler Post
